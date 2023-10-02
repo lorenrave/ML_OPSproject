@@ -133,48 +133,7 @@ def sentiment_analysis(anio: int):
 
 
 
-#Modelo de machine learning
 
-
-
-
-muestra=steam_games.head(4000)
-muestra=muestra.drop(columns='Unnamed: 0', inplace=True)
-# Preprocesamiento de datos
-steam = muestra
-# Combinamos las columnas 'genres' y 'title' en una sola columna 'features'
-steam['features'] = steam['genres'] + ' ' + steam['title']
-# Inicializamos el vectorizador de texto
-vectorizer = CountVectorizer()
-# Creamos una matriz de términos-documentos
-X = vectorizer.fit_transform(steam['features'])
-# Calculamos la similitud del coseno entre los juegos
-cosine_sim = cosine_similarity(X, X)
-
-@app.get('/recomendacion_juegos/{game_id}')
-def recomendacion_juego(game_id):
-    try:
-        # Obtener el título del juego a partir del ID
-        game_title = steam.loc[steam['id'] == game_id, 'title'].values[0]
-
-        # Obtener el índice del juego en el DataFrame
-        game_index = steam.index[steam['title'] == game_title].tolist()[0]
-
-        # Obtener las puntuaciones de similitud del juego en cuestión
-        sim_scores = list(enumerate(cosine_sim[game_index]))
-
-        # Ordenar los juegos por similitud en orden descendente
-        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-
-        # Obtener los 5 juegos más similares (excluyendo el juego de entrada)
-        top_n = 5
-        recommended_games = []
-        for i, sim in sim_scores[1:top_n+1]:
-            recommended_games.append(steam['title'][i])
-
-        return {"Juego": game_title, "juegos_recomendados": recommended_games}
-    except Exception as e:
-        return {"error": str(e)}
 
 
 
