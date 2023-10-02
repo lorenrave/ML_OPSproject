@@ -1,4 +1,4 @@
-##Machine Learning Operations
+##Machine Learning Operations##
 
 En este proyecto, asumí el rol de Data Scientist para la plataforma de juegos Steam, donde tuve la oportunidad de contribuir con la mejora de la experiencia de los usuarios.
 El objetivo principal de este proyecto fue la creación de un Producto Mínimo Viable (MVP) que pudiera ofrecer un mayor valor agregado.
