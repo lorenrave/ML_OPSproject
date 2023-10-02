@@ -10,11 +10,15 @@ steam_games = pd.read_csv('data/df_games_clean.csv')
 users_items = pd.read_csv('data/user_items_clean.csv')
 users_reviews = pd.read_csv('data/user_reviews_clean.csv')
 
+
 @app.get('/PlayTimeGenre/{genero}')
 def PlayTimeGenre(genero: str):
 
-    # Combinar los DataFrames steam_games y users_items
-    merged_data = pd.merge(users_items, steam_games, on='id', how='inner')
+    # Obtener las primeras 4000 filas de users_items
+    users_items_first_4000 = users_items.head(4000)
+
+    # Combinar los DataFrames steam_games y users_items (solo las primeras 4000 filas)
+    merged_data = pd.merge(users_items_first_4000, steam_games, on='id', how='inner')
 
     # Filtrar por género en la columna 'genres'
     df_filtered = merged_data[merged_data['genres'].str.contains(genero, case=False)]
@@ -36,10 +40,14 @@ def PlayTimeGenre(genero: str):
     return {"Año de lanzamiento con más horas jugadas para " + genero: int(max_year)}
 
 
+
 @app.get('/UserForGenre/{genero}')
 def UserForGenre(genero: str):
+    # Obtener las primeras 4000 filas de users_items
+    users_items_first_4000 = users_items.head(4000)
+
     # Realizar el merge de users_items y steam_games en base a user_id
-    merged_data = pd.merge(users_items, steam_games, on='id', how='inner')
+    merged_data = pd.merge(users_items_first_4000, steam_games, on='id', how='inner')
 
     # Filtrar los juegos por el género dado
     genero_df = merged_data[merged_data['genres'].str.contains(genero, case=False)]
@@ -61,14 +69,20 @@ def UserForGenre(genero: str):
     }
 
     return respuesta
+
+
+
    
 
 
 
 @app.get('/users_recommend/{anio}')
 def users_recommend(anio: int):
+    # Obtener las primeras 4000 filas de users_reviews
+    users_reviews_first_4000 = users_reviews.head(4000)
+
     # Filtrar las reseñas para el año dado y las reseñas recomendadas y positivas/neutrales
-    filtered_reviews = users_reviews[(users_reviews['posted year'] == anio) & (users_reviews['recommend'] == True) & (users_reviews['sentiment_analysis'] >= 0)]
+    filtered_reviews = users_reviews_first_4000[(users_reviews_first_4000['posted year'] == anio) & (users_reviews_first_4000['recommend'] == True) & (users_reviews_first_4000['sentiment_analysis'] >= 0)]
 
     # Realizar un merge de los DataFrames users_items, filtered_reviews y steam_games
     merged_data = pd.merge(users_items, filtered_reviews, on='user_id')
@@ -92,8 +106,11 @@ def users_recommend(anio: int):
 
 @app.get('/UsersNotRecommend/{anio}')
 def UsersNotRecommend(anio: int):
+    # Obtener las primeras 4000 filas de users_reviews
+    users_reviews_first_4000 = users_reviews.head(4000)
+
     # Realizar un merge entre steam_games y users_reviews en base a la columna 'item_id'
-    merged_data = pd.merge(users_reviews, steam_games, left_on='item_id', right_on='id', how='inner')
+    merged_data = pd.merge(users_reviews_first_4000, steam_games, left_on='item_id', right_on='id', how='inner')
 
     # Filtrar las reseñas para el año dado y las reseñas NO recomendadas y con comentarios negativos
     filtered_reviews = merged_data[(merged_data['posted year'] == anio) & (merged_data['recommend'] == False)]
@@ -113,14 +130,16 @@ def UsersNotRecommend(anio: int):
 
 
 
-
 @app.get('/sentiment_analysis/{anio}')
 def sentiment_analysis(anio: int):
     if anio < 1900 or anio > 2023:
         return {"Error": "Año fuera de rango"}
 
+    # Obtener las primeras 4000 filas de users_reviews
+    users_reviews_first_4000 = users_reviews.head(4000)
+
     # Filtra los datos para el año proporcionado
-    reviews_anio = users_reviews[users_reviews['posted year'] == anio]
+    reviews_anio = users_reviews_first_4000[users_reviews_first_4000['posted year'] == anio]
 
     # Cuenta los registros para cada categoría de análisis de sentimiento
     sentiment_counts = reviews_anio['sentiment_analysis'].value_counts()
@@ -134,7 +153,7 @@ def sentiment_analysis(anio: int):
 
 
 # Tomar los primeros 4000 datos de steam_games
-muestra = steam_games.head(4000)
+muestra = steam_games.head(1000)
 
 # Preprocesamiento de datos
 steam = muestra.dropna(subset=['title', 'genres'])
@@ -177,6 +196,4 @@ def recomendacion_juego(game_id):
         return {"Juego": game_title, "juegos_recomendados": recommended_games}
     except Exception as e:
         return {"error": str(e)}
-
-
 
