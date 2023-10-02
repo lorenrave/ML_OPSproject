@@ -1,9 +1,9 @@
-###  Machine Learning Operations
+#  Machine Learning Operations
 
 En este proyecto, asumí el rol de Data Scientist para la plataforma de juegos Steam, donde tuve la oportunidad de contribuir con la mejora de la experiencia de los usuarios.
 El objetivo principal de este proyecto fué la creación de un Producto Mínimo Viable (MVP) que pudiera ofrecer un mayor valor agregado.
 
-Proceso de ETL y Data Engineering:
+###  Proceso de ETL y Data Engineering:
 
 Dentro de este proyecto, uno de los aspectos fundamentales fue el proceso de Extracción, Transformación y Carga de Datos (ETL), junto con tareas de Ingeniería de Datos.
 En este contexto, realicé la extracción de datos de diferentes archivos JSON, y gestioné datos anidados y valores nulos para garantizar que los datos estuvieran en condiciones óptimas para su posterior análisis.
@@ -12,7 +12,7 @@ Feature Engineering
 En esta etapa trabajé en generar un análisis de sentimiento de las reseñas de los usuarios utilizando técnicas avanzadas de Procesamiento de Lenguaje Natural (NLP). Este análisis se tradujo en la creación de la columna 'sentiment_analysis'
 que tomó valores de '0' para reseñas negativas, '1' para neutrales y '2' para positivas. 
 
-#  Análisis Exploratorio de Datos (EDA):
+###  Análisis Exploratorio de Datos (EDA):
 
 Una vez que los datos estuvieron preparados, realicé un Análisis Exploratorio de Datos (EDA) para comprender a fondo la naturaleza de los juegos en Steam. Algunas de las áreas clave exploradas incluyeron:
 Un análisis detallado de los precios de los juegos, permitiendo identificar tendencias de precios y entender cómo se ajustan a las preferencias de los usuarios.
@@ -25,7 +25,7 @@ Aquí el enlace del deploy
 https://proyect-ml-deploy.onrender.com/docs
 
 
-#  Modelo de Aprendizaje Automático y Sistema de Recomendación:
+### Modelo de Aprendizaje Automático y Sistema de Recomendación:
 
 También se abordó la tarea de desarrollar un sistema de recomendación que se basa en la relación ítem-ítem. Esto significa que, dado un juego específico como entrada (el "ítem de consulta"), el objetivo era recomendar una lista de juegos similares 
 a ese juego en particular. Para lograr esto, se aplicó un enfoque de similitud del coseno, que se basa en la similitud de características entre los juegos.
