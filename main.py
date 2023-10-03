@@ -15,10 +15,10 @@ users_reviews = pd.read_csv('data/user_reviews_clean.csv')
 def PlayTimeGenre(genero: str):
 
     # Obtener las primeras 4000 filas de users_items
-    users_items_first_4000 = users_items.head(4000)
+    users_items_first_2000 = users_items.head(2000)
 
     # Combinar los DataFrames steam_games y users_items (solo las primeras 4000 filas)
-    merged_data = pd.merge(users_items_first_4000, steam_games, on='id', how='inner')
+    merged_data = pd.merge(users_items_first_2000, steam_games, on='id', how='inner')
 
     # Filtrar por género en la columna 'genres'
     df_filtered = merged_data[merged_data['genres'].str.contains(genero, case=False)]
@@ -43,11 +43,11 @@ def PlayTimeGenre(genero: str):
 
 @app.get('/UserForGenre/{genero}')
 def UserForGenre(genero: str):
-    # Obtener las primeras 4000 filas de users_items
-    users_items_first_4000 = users_items.head(4000)
+    # Obtener las primeras 2000 filas de users_items
+    users_items_first_2000 = users_items.head(2000)
 
     # Realizar el merge de users_items y steam_games en base a user_id
-    merged_data = pd.merge(users_items_first_4000, steam_games, on='id', how='inner')
+    merged_data = pd.merge(users_items_first_2000, steam_games, on='id', how='inner')
 
     # Filtrar los juegos por el género dado
     genero_df = merged_data[merged_data['genres'].str.contains(genero, case=False)]
@@ -106,7 +106,7 @@ def users_recommend(anio: int):
 
 @app.get('/UsersNotRecommend/{anio}')
 def UsersNotRecommend(anio: int):
-    # Obtener las primeras 4000 filas de users_reviews
+    # Obtener las primeras 2000 filas de users_reviews
     users_reviews_first_4000 = users_reviews.head(4000)
 
     # Realizar un merge entre steam_games y users_reviews en base a la columna 'item_id'
@@ -135,7 +135,7 @@ def sentiment_analysis(anio: int):
     if anio < 1900 or anio > 2023:
         return {"Error": "Año fuera de rango"}
 
-    # Obtener las primeras 4000 filas de users_reviews
+    # Obtener las primeras 2000 filas de users_reviews
     users_reviews_first_4000 = users_reviews.head(4000)
 
     # Filtra los datos para el año proporcionado
@@ -150,50 +150,46 @@ def sentiment_analysis(anio: int):
     return result
 
 
+#Modelo machine learning
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import linear_kernel
+
+# Cargar los primeros 1000 datos de tu conjunto de datos
+steam_games = pd.read_csv('data/df_games_clean.csv', nrows=1000)
+
+# Crear la matriz TF-IDF
+tfidf_vectorizer = TfidfVectorizer(stop_words='english')
+tfidf_matrix = tfidf_vectorizer.fit_transform(steam_games['genres'])
+
+# Calcular la similitud del coseno entre los juegos
+cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
+
+@app.get("/recommend/{game_id}")
+async def get_recommendations(game_id: int):
+    # Obtener el índice del juego correspondiente al ID dado
+    idx = steam_games.index[steam_games['id'] == game_id].tolist()[0]
+
+    # Calcular las puntuaciones de similitud del coseno para todos los juegos
+    sim_scores = list(enumerate(cosine_sim[idx]))
+
+    # Ordenar los juegos según las puntuaciones de similitud
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+
+    # Obtener los 5 juegos más similares (excluyendo el juego de entrada)
+    sim_scores = sim_scores[1:6]
+
+    # Obtener los índices de los juegos recomendados
+    game_indices = [i[0] for i in sim_scores]
+
+    # Devolver los títulos de los juegos recomendados
+    recommendations = steam_games['title'].iloc[game_indices].tolist()
+    return recommendations
 
 
-# Tomar los primeros 4000 datos de steam_games
-muestra = steam_games.head(1000)
 
-# Preprocesamiento de datos
-steam = muestra.dropna(subset=['title', 'genres'])
-steam['price'] = steam['price'].fillna(0)
-steam['genres'] = steam['genres'].fillna('[]').astype(str)
 
-# Combinamos las columnas 'genres' y 'title' en una sola columna 'features'
-steam['features'] = steam['genres'] + ' ' + steam['title']
 
-# Inicializamos el vectorizador de texto
-vectorizer = CountVectorizer()
 
-# Creamos una matriz de términos-documentos
-X = vectorizer.fit_transform(steam['features'])
 
-# Calculamos la similitud del coseno entre los juegos
-cosine_sim = cosine_similarity(X, X)
-
-@app.get('/recomendacion_juego/{game_id}')
-def recomendacion_juego(game_id):
-    try:
-        # Obtener el título del juego a partir del ID
-        game_title = steam.loc[steam['id'] == game_id, 'title'].values[0]
-
-        # Obtener el índice del juego en el DataFrame
-        game_index = steam.index[steam['title'] == game_title].tolist()[0]
-
-        # Obtener las puntuaciones de similitud del juego en cuestión
-        sim_scores = list(enumerate(cosine_sim[game_index]))
-
-        # Ordenar los juegos por similitud en orden descendente
-        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-
-        # Obtener los 5 juegos más similares (excluyendo el juego de entrada)
-        top_n = 5
-        recommended_games = []
-        for i, sim in sim_scores[1:top_n+1]:
-            recommended_games.append(steam['title'].iloc[i])
-
-        return {"Juego": game_title, "juegos_recomendados": recommended_games}
-    except Exception as e:
-        return {"error": str(e)}
 
