@@ -47,7 +47,7 @@ Ejemplo de retorno: [{"Puesto 1" : X}, {"Puesto 2" : Y},{"Puesto 3" : Z}]
 def sentiment_analysis( año : int ): Según el año de lanzamiento, se devuelve una lista con la cantidad de registros de reseñas de usuarios que se encuentren categorizados con un análisis de sentimiento.
 Ejemplo de retorno: {Negative = 182, Neutral = 120, Positive = 278}
 
-Aquí el enlace del deploy en render para poder ejecutar dichas consultas:
+Aquí el enlace del deploy en render para poder ejecutar dichas consultas(para poder ejecutarlas sin problemas, se debió achicar la cantidad de datos):
 
 https://proyect-ml-deploy.onrender.com/docs
 
